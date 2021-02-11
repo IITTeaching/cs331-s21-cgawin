@@ -33,8 +33,25 @@ ROMEO_SOLILOQUY = """
 ################################################################################
 # Implement this function
 def compute_ngrams(toks, n=2):
-    """Returns an n-gram dictionary based on the provided list of tokens."""
-    pass
+    nGrams = []
+    for i in range(len(toks) - n + 1):
+        nGram = []
+        for j in range(i, n + i):
+            nGram.append(toks[j])
+        nGrams.append(nGram)
+
+    dict = {}
+    for i in range(len(nGrams)):
+        nGram = nGrams[i]
+        if nGram[0] not in dict:
+            dict[nGram[0]] = []
+        
+        seq = []
+        for j in range(1, len(nGram)):
+            seq.append(nGram[j])
+        dict[nGram[0]].append(tuple(seq))
+        
+    return dict
 
 def test1():
     test1_1()
@@ -48,7 +65,11 @@ def test1_1():
 
     compute_ngrams(simple_toks)
     tc.assertEqual(compute_ngrams(simple_toks),
-                   {'i': [('really',)], 'like': [('cake.',)], 'really': [('really',), ('like',)]})
+                   {
+                    'i': [('really',)],
+                    'like': [('cake.',)],
+                    'really': [('really',), ('like',)]
+                   })
     tc.assertEqual(compute_ngrams(simple_toks, n=3),
                    {'i': [('really', 'really')],
                     'really': [('really', 'like'), ('like', 'cake.')]})
@@ -93,7 +114,22 @@ def test1_2():
 ################################################################################
 # Implement this function
 def gen_passage(ngram_dict, length=100):
-    pass
+    key = random.choice(sorted(ngram_dict.keys()))
+    string = key
+    while len(string.split()) < length:
+        tup = random.choice(ngram_dict[key])
+        string = string + " " + " ".join(tup)
+        
+        last = tup[-1]
+        if last in ngram_dict:
+            key = last
+            continue
+        else:
+            key = random.choice(sorted(ngram_dict.keys()))
+            string = string + " " + key
+
+    return string
+
 
 # 50 Points
 def test2():
