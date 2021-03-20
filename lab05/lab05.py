@@ -12,8 +12,8 @@ class LinkedList:
             self.next = next
 
     def __init__(self):
-        self.head = LinkedList.Node(None) # sentinel node (never to be removed)
-        self.head.prior = self.head.next = self.head # set up "circular" topology
+        self.head = LinkedList.Node(None)  # sentinel node (never to be removed)
+        self.head.prior = self.head.next = self.head  # set up "circular" topology
         self.cursor = self.head
         self.length = 0
 
@@ -41,7 +41,7 @@ class LinkedList:
 
     def __getitem__(self, idx):
         """Implements `x = self[idx]`"""
-        assert(isinstance(idx, int))
+        assert (isinstance(idx, int))
         ### BEGIN SOLUTION
         idx = self._normalize_idx(idx)
         cur = self.head.next
@@ -54,7 +54,7 @@ class LinkedList:
 
     def __setitem__(self, idx, value):
         """Implements `self[idx] = x`"""
-        assert(isinstance(idx, int))
+        assert (isinstance(idx, int))
         ### BEGIN SOLUTION
         idx = self._normalize_idx(idx)
         cur = self.head.next
@@ -67,7 +67,7 @@ class LinkedList:
 
     def __delitem__(self, idx):
         """Implements `del self[idx]`"""
-        assert(isinstance(idx, int))
+        assert (isinstance(idx, int))
         ### BEGIN SOLUTION
         idx = self._normalize_idx(idx)
         cur = self.head.next
@@ -305,7 +305,7 @@ class LinkedList:
         """Implements `self + other_list`. Returns a new LinkedList
         instance that contains the values in this list followed by those
         of other."""
-        assert(isinstance(other, LinkedList))
+        assert (isinstance(other, LinkedList))
         ### BEGIN SOLUTION
         ll = LinkedList()
         for val in self:
@@ -370,8 +370,10 @@ class LinkedList:
 def say_test(mess):
     print(80 * "*" + "\n" + mess)
 
+
 def say_success():
     print("SUCCESS")
+
 
 ################################################################################
 # (11 points) test subscript-based access
@@ -420,6 +422,7 @@ def test_subscript_access():
     for i in range(0, -len(data), -1):
         tc.assertEqual(lst[i], data[i])
 
+
 ################################################################################
 ### (12 points) test cursor-based access
 def test_custor_based_access():
@@ -438,7 +441,7 @@ def test_custor_based_access():
     for _ in range(10):
         pos = random.randrange(len(lst1))
         vals = [random.randrange(1000) for _ in range(10)]
-        lst1[pos+1:pos+1] = vals
+        lst1[pos + 1:pos + 1] = vals
         lst2.cursor_set(pos)
         for x in vals:
             lst2.cursor_insert(x)
@@ -507,6 +510,7 @@ def test_stringification():
     tc.assertEqual('[10, 20, 30, 40, 50]', str(lst))
     tc.assertEqual('[10, 20, 30, 40, 50]', repr(lst))
 
+
 ################################################################################
 # (11 points) test single-element manipulation
 def test_single_element_manipulation():
@@ -517,7 +521,7 @@ def test_single_element_manipulation():
 
     for _ in range(100):
         to_ins = random.randrange(1000)
-        ins_idx = random.randrange(len(data)+1)
+        ins_idx = random.randrange(len(data) + 1)
         data.insert(ins_idx, to_ins)
         lst.insert(ins_idx, to_ins)
 
@@ -541,6 +545,7 @@ def test_single_element_manipulation():
 
     with tc.assertRaises(ValueError):
         lst.remove(9999)
+
 
 ################################################################################
 # (11 points) test predicates
@@ -566,6 +571,7 @@ def test_predicates():
         lst.append(i)
     tc.assertFalse(100 in lst)
     tc.assertTrue(50 in lst)
+
 
 ################################################################################
 # (11 points) test queries
@@ -605,6 +611,7 @@ def test_queries():
     with tc.assertRaises(ValueError):
         lst.index(2, 4, -2)
 
+
 ################################################################################
 # (11 points) test bulk operations
 def test_bulk_operations():
@@ -618,7 +625,7 @@ def test_bulk_operations():
     tc.assertEqual(0, len(lst3))
 
     import random
-    data  = [random.randrange(1000) for _ in range(50)]
+    data = [random.randrange(1000) for _ in range(50)]
     data2 = [random.randrange(1000) for _ in range(50)]
     for d in data:
         lst.append(d)
@@ -646,13 +653,14 @@ def test_bulk_operations():
 
     lst.clear()
     lst.extend(range(10))
-    lst.extend(range(10,0,-1))
+    lst.extend(range(10, 0, -1))
     lst.extend(data.copy())
     tc.assertEqual(70, len(lst))
 
     data = list(range(10)) + list(range(10, 0, -1)) + data
     for i in range(len(data)):
         tc.assertEqual(data[i], lst[i])
+
 
 ################################################################################
 # (11 points) test iteration
@@ -674,6 +682,7 @@ def test_iteration():
         tc.assertEqual(next(it1), x)
         tc.assertEqual(next(it2), x)
 
+
 ################################################################################
 # (11 points) test reverse
 def test_reverse():
@@ -691,6 +700,7 @@ def test_reverse():
     for i in range(0, len(data)):
         tc.assertEqual(lst[i], rev[len(data) - i - 1])
 
+
 ################################################################################
 # MAIN
 def main():
@@ -703,8 +713,9 @@ def main():
               test_bulk_operations,
               test_iteration,
               test_reverse]:
-         t()
-         say_success()
+        t()
+        say_success()
+
 
 if __name__ == '__main__':
     main()
