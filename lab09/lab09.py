@@ -1,7 +1,8 @@
-#changes
+# changes
 
 from unittest import TestCase
 import random
+
 
 class HBStree:
     """This is an immutable binary search tree with history.
@@ -16,6 +17,7 @@ class HBStree:
         modify this code.
         """
         __slots__ = []
+
         def __new__(cls, val, left, right):
             return tuple.__new__(cls, (val, left, right))
 
@@ -53,6 +55,21 @@ class HBStree:
         KeyError, if key does not exist.
         """
         # BEGIN SOLUTION
+        node = self.get_current_root()
+        while True:
+            if node.val == key:
+                return True
+
+            if key < node.val:
+                if not node.left:
+                    raise KeyError
+                else:
+                    node = node.left
+            else:
+                if not node.right:
+                    raise KeyError
+                else:
+                    node = node.right
         # END SOLUTION
 
     def __contains__(self, el):
@@ -60,20 +77,93 @@ class HBStree:
         Return True if el exists in the current version of the tree.
         """
         # BEGIN SOLUTION
+        try:
+            self.__getitem__(el)
+            return True
+        except:
+            return False
         # END SOLUTION
 
-    def insert(self,key):
+    def insert(self, key):
         """
         Adds key to the tree, creating a new version of the
         tree. If key already exists, then do nothing and refrain
         from creating a new version.
         """
+
         # BEGIN SOLUTION
+        def sift_down(node):
+            if not node:
+                return HBStree.INode(key, None, None)
+            if key < node.val:
+                return HBStree.INode(node.val, sift_down(node.left), node.right)
+            else:
+                return HBStree.INode(node.val, node.left, sift_down(node.right))
+
+        if self.__contains__(key):
+            return
+
+        self.root_versions.append(sift_down(self.get_current_root()))
+
         # END SOLUTION
 
-    def delete(self,key):
-        """Delete key from the tree, creating a new version of the tree. If key does not exist in the current version of the tree, then do nothing and refrain from creating a new version."""
+    def delete(self, key):
+        """Delete key from the tree, creating a new version of the tree. If key does not exist in the current version
+        of the tree, then do nothing and refrain from creating a new version. """
         # BEGIN SOLUTION
+
+        if not self.__contains__(key):
+            return
+
+        # mutable root node
+        root = self.get_current_root()
+
+        def sift_up(old_node, new_node):
+            if old_node is root:
+                return new_node
+
+            parent, node = None, root
+            while old_node.val is not node.val:
+                if old_node.val < node.val:
+                    parent, node = node, node.left
+                else:
+                    parent, node = node, node.right
+
+            new_parent = HBStree.INode(parent.val, new_node, parent.right) if old_node.val < parent.val \
+                else HBStree.INode(parent.val, new_node, parent.right)
+            return sift_up(parent, new_parent)
+
+        # find node that is to be deleted
+        to_del = self.get_current_root()
+        while to_del.val != key:
+            if key < to_del.val:
+                to_del = to_del.left
+            else:
+                to_del = to_del.right
+
+        # node that will replace node that is to be deleted
+        new_node = None
+
+        # if node has neither children
+        if not to_del.left and not to_del.right:
+            new_node = None
+        # if node has left child but not right
+        elif to_del.left and not to_del.right:
+            new_node = to_del.left
+        # if node has right child but not left
+        elif to_del.right and not to_del.left:
+            new_node = to_del.right
+        # if node has both children
+        else:
+            parent, largest = to_del, to_del.left
+            while largest.right and largest.right.val > largest.val: largest = largest.right
+            new_parent = HBStree.INode(parent.val, largest.left, parent.right) if largest.left.val < parent.val \
+                else HBStree.INode(parent.val, largest.left, parent.right)
+            root = sift_up(parent, new_parent)
+
+        print((to_del, new_node))
+
+        self.root_versions.append(sift_up(to_del, new_node))
         # END SOLUTION
 
     @staticmethod
@@ -118,7 +208,7 @@ class HBStree:
         the data structure (recall that nodes can be shared across versions).
         """
         t = self.total_size()
-        sumsizes = sum([ HBStree.subtree_size(r) for r in self.root_versions ])
+        sumsizes = sum([HBStree.subtree_size(r) for r in self.root_versions])
         return sumsizes / t
 
     def get_current_root(self):
@@ -143,8 +233,20 @@ class HBStree:
         BS-tree.
         """
         if timetravel < 0 or timetravel >= len(self.root_versions):
-            raise IndexError(f"valid versions for time travel are 0 to {len(self.root_versions) -1}, but was {timetravel}")
+            raise IndexError(
+                f"valid versions for time travel are 0 to {len(self.root_versions) - 1}, but was {timetravel}")
         # BEGIN SOLUTION
+        root = self.root_versions[-(timetravel + 1)]
+
+        def traverse(node):
+            if not node:
+                return []
+            vals = traverse(node.left)
+            vals.append(node.val)
+            vals += traverse(node.right)
+            return vals
+
+        return traverse(root)
         # END SOLUTION
 
     @staticmethod
@@ -153,25 +255,25 @@ class HBStree:
         Creates a string representation of the tree rooted at root.
         """
         height = HBStree.height(root)
-        width=4 * pow(2,height)
+        width = 4 * pow(2, height)
         nodes = [(root, 0)]
         prev_level = 0
         repr_str = ''
         while nodes:
-            n,level = nodes.pop(0)
+            n, level = nodes.pop(0)
             if prev_level != level:
                 prev_level = level
                 repr_str += '\n'
             if not n:
-                if level < height-1:
-                    nodes.extend([(None, level+1), (None, level+1)])
-                repr_str += '{val:^{width}}'.format(val='-', width=width//2**level)
+                if level < height - 1:
+                    nodes.extend([(None, level + 1), (None, level + 1)])
+                repr_str += '{val:^{width}}'.format(val='-', width=width // 2 ** level)
             elif n:
-                if n.left or level < height-1:
-                    nodes.append((n.left, level+1))
-                if n.right or level < height-1:
-                    nodes.append((n.right, level+1))
-                repr_str += '{val:^{width}}'.format(val=n.val, width=width//2**level)
+                if n.left or level < height - 1:
+                    nodes.append((n.left, level + 1))
+                if n.right or level < height - 1:
+                    nodes.append((n.right, level + 1))
+                repr_str += '{val:^{width}}'.format(val=n.val, width=width // 2 ** level)
         return repr_str
 
     @staticmethod
@@ -179,11 +281,13 @@ class HBStree:
         """
         Returns the height of the longest branch of a tree rooted at root.
         """
+
         def height_rec(n):
             if not n:
                 return 0
             else:
-                return max(1+height_rec(n.left), 1+height_rec(n.right))
+                return max(1 + height_rec(n.left), 1 + height_rec(n.right))
+
         return height_rec(root)
 
     def __str__(self):
@@ -198,6 +302,7 @@ class HBStree:
             r = self.root_versions[t]
             s += (80 * "=") + f"\nVersion: {t}\n" + (80 * "=") + f"\n{HBStree.stringify_subtree(r)}\n"
         return s
+
 
 ################################################################################
 # TEST CASES
