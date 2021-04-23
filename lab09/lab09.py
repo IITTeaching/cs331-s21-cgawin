@@ -161,7 +161,6 @@ class HBStree:
                 else HBStree.INode(parent.val, largest.left, parent.right)
             root = sift_up(parent, new_parent)
 
-        print((to_del, new_node))
 
         self.root_versions.append(sift_up(to_del, new_node))
         # END SOLUTION
