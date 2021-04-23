@@ -90,7 +90,6 @@ class HBStree:
         tree. If key already exists, then do nothing and refrain
         from creating a new version.
         """
-
         # BEGIN SOLUTION
         def sift_down(node):
             if not node:
@@ -112,9 +111,6 @@ class HBStree:
         of the tree, then do nothing and refrain from creating a new version. """
         # BEGIN SOLUTION
 
-        if not self.__contains__(key):
-            return
-
         # mutable root node
         root = self.get_current_root()
 
@@ -132,6 +128,9 @@ class HBStree:
             new_parent = HBStree.INode(parent.val, new_node, parent.right) if old_node.val < parent.val \
                 else HBStree.INode(parent.val, new_node, parent.right)
             return sift_up(parent, new_parent)
+
+        if not self.__contains__(key):
+            return
 
         # find node that is to be deleted
         to_del = self.get_current_root()
@@ -156,11 +155,12 @@ class HBStree:
         # if node has both children
         else:
             parent, largest = to_del, to_del.left
-            while largest.right and largest.right.val > largest.val: largest = largest.right
+            while largest.right and largest.right.val > largest.val:
+                largest = largest.right
+
             new_parent = HBStree.INode(parent.val, largest.left, parent.right) if largest.left.val < parent.val \
                 else HBStree.INode(parent.val, largest.left, parent.right)
             root = sift_up(parent, new_parent)
-
 
         self.root_versions.append(sift_up(to_del, new_node))
         # END SOLUTION
@@ -177,7 +177,7 @@ class HBStree:
 
     def __len__(self):
         """
-        Return the nuber of nodes in the current version of the tree.
+        Return the number of nodes in the current version of the tree.
         """
         return HBStree.subtree_size(self.get_current_root())
 
@@ -315,40 +315,44 @@ def check_inserted(vals):
     for v in vals:
         t.insert(v)
 
-    for i in range(0,len(vals) + 1):
-        sortel = [ v for v in t.version_iter(len(vals) - i) ]
+    for i in range(0, len(vals) + 1):
+        sortel = [v for v in t.version_iter(len(vals) - i)]
         sortval = sorted(vals[0:i])
-        for j in range(0,i):
-            tc.assertEqual(sortval[j],sortel[j])
+        for j in range(0, i):
+            tc.assertEqual(sortval[j], sortel[j])
     return t
+
 
 # 20 points
 def test_insert_1():
-    check_inserted([3,1,5])
-    check_inserted([1,2,3,4,5,6])
-    check_inserted([6,5,4,3,2,1])
-    check_inserted([11,51,1,6,89,123,4,2,3,5,7])
+    check_inserted([3, 1, 5])
+    check_inserted([1, 2, 3, 4, 5, 6])
+    check_inserted([6, 5, 4, 3, 2, 1])
+    check_inserted([11, 51, 1, 6, 89, 123, 4, 2, 3, 5, 7])
+
 
 # 20 points
 def test_insert_2():
-    for i in range(0,10):
-        vals = [ random.randint(0,100) for i in range(0,100) ]
+    for i in range(0, 10):
+        vals = [random.randint(0, 100) for i in range(0, 100)]
         vals = list(set(vals))
         random.shuffle(vals)
         check_inserted(vals)
 
+
 # 10 points
 def test_lookup():
-    for i in range(0,10):
-        vals = [ random.randint(0,100) for i in range(0,100) ]
+    for i in range(0, 10):
+        vals = [random.randint(0, 100) for i in range(0, 100)]
         vals = list(set(vals))
         random.shuffle(vals)
         t = check_inserted(vals)
         tc = TestCase()
         for v in vals:
             tc.assertTrue(v in t)
-        for v in [ random.randint(101,1000) for i in range(0,100) ]:
+        for v in [random.randint(101, 1000) for i in range(0, 100)]:
             tc.assertFalse(v in t)
+
 
 def insert_check_delete(vals):
     tc = TestCase()
@@ -360,26 +364,29 @@ def insert_check_delete(vals):
         t.insert(v)
 
     todo = sorted(vals)
-    for i in range(0,len(vals)):
+    for i in range(0, len(vals)):
         t.delete(todo[0])
         del todo[0]
-        sortel = [ v for v in t.version_iter() ]
+        sortel = [v for v in t.version_iter()]
         sortval = sorted(todo)
-        for j in range(0,len(sortval)):
-            tc.assertEqual(sortval[j],sortel[j])
+        for j in range(0, len(sortval)):
+            tc.assertEqual(sortval[j], sortel[j])
+
 
 # 20 points
 def test_delete_1():
-    insert_check_delete([1,2,3,4,5])
-    insert_check_delete([2,5,1,7,6,4])
+    insert_check_delete([1, 2, 3, 4, 5])
+    insert_check_delete([2, 5, 1, 7, 6, 4])
+
 
 # 20 points
 def test_delete_2():
-    for i in range(0,10):
-        vals = [ random.randint(0,100) for i in range(0,100) ]
+    for i in range(0, 10):
+        vals = [random.randint(0, 100) for i in range(0, 100)]
         vals = list(set(vals))
         random.shuffle(vals)
         insert_check_delete(vals)
+
 
 # 10 points
 def test_corner_cases():
@@ -387,21 +394,21 @@ def test_corner_cases():
     t = HBStree()
 
     # insert multiple times
-    for i in range(0,10,2):
-        for j in range(0,3):
+    for i in range(0, 10, 2):
+        for j in range(0, 3):
             t.insert(i)
 
-    tc.assertEqual(t.num_versions(), len(range(0,10,2)) + 1)
+    tc.assertEqual(t.num_versions(), len(range(0, 10, 2)) + 1)
 
     t = HBStree()
 
-    for i in range(0,5):
+    for i in range(0, 5):
         t.insert(3 * i)
 
-    for i in range(0,5):
+    for i in range(0, 5):
         t.delete(0)
 
-    tc.assertEqual(t.num_versions(), len(range(0,5)) + 2)
+    tc.assertEqual(t.num_versions(), len(range(0, 5)) + 2)
 
     with tc.assertRaises(KeyError):
         t[0]
@@ -421,8 +428,10 @@ def test_corner_cases():
 def say_test(f):
     print(80 * "#" + "\n" + f.__name__ + "\n" + 80 * "#" + "\n")
 
+
 def say_success():
     print("----> SUCCESS")
+
 
 ################################################################################
 # MAIN
@@ -438,6 +447,7 @@ def main():
         t()
         say_success()
     print(80 * "#" + "\nALL TEST CASES FINISHED SUCCESSFULLY!\n" + 80 * "#")
+
 
 if __name__ == '__main__':
     main()
