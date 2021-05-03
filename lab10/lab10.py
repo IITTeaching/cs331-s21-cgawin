@@ -1,6 +1,7 @@
 from unittest import TestCase
 import random
 
+
 class AVLTree:
     class Node:
         def __init__(self, val, left=None, right=None):
@@ -15,6 +16,9 @@ class AVLTree:
 
         def rotate_left(self):
             ### BEGIN SOLUTION
+            n = self.right
+            self.val, n.val = n.val, self.val
+            self.right, n.right, self.left, n.left = n.right, n.left, n, self.left
             ### END SOLUTION
 
         @staticmethod
@@ -22,7 +26,7 @@ class AVLTree:
             if not n:
                 return 0
             else:
-                return max(1+AVLTree.Node.height(n.left), 1+AVLTree.Node.height(n.right))
+                return max(1 + AVLTree.Node.height(n.left), 1 + AVLTree.Node.height(n.right))
 
     def __init__(self):
         self.size = 0
@@ -31,16 +35,75 @@ class AVLTree:
     @staticmethod
     def rebalance(t):
         ### BEGIN SOLUTION
+        def balance_factor(node):
+            return AVLTree.Node.height(node.left) - AVLTree.Node.height(node.right)
+
+        node_balance_factor = balance_factor(t)
+        if node_balance_factor < 0:
+            if balance_factor(t.right) > 0:
+                t.right.rotate_right()
+            t.rotate_left()
+            AVLTree.rebalance(t.left)
+
+        elif node_balance_factor > 0:
+            if balance_factor(t.left) < 0:
+                t.left.rotate_left()
+            t.rotate_right()
+            AVLTree.rebalance(t.right)
         ### END SOLUTION
 
     def add(self, val):
-        assert(val not in self)
+        assert (val not in self)
+
         ### BEGIN SOLUTION
+        def insert(node, key):
+            if node is None:
+                return self.Node(key)
+            elif key > node.val:
+                node.right = insert(node.right, key)
+            else:
+                node.left = insert(node.left, key)
+
+            AVLTree.rebalance(node)
+            return node
+
+        if self.size == 0:
+            self.root = self.Node(val)
+        else:
+            insert(self.root, val)
+
+        self.size += 1
         ### END SOLUTION
 
     def __delitem__(self, val):
-        assert(val in self)
+        assert (val in self)
+
         ### BEGIN SOLUTION
+        def delete(node, key):
+            if node is None:
+                return node
+            elif key > node.val:
+                node.right = delete(node.right, key)
+            elif key < node.val:
+                node.left = delete(node.left, key)
+
+            else:
+                if node.right is None:
+                    return node.left
+                elif node.left is None:
+                    return node.right
+
+                minimum = node.right
+                while minimum.left:
+                    minimum = minimum.left
+                node.val = minimum.val
+                node.right = delete(node.right, minimum.val)
+
+            AVLTree.rebalance(node)
+            return node
+
+        self.root = delete(self.root, val)
+        self.size -= 1
         ### END SOLUTION
 
     def __contains__(self, val):
@@ -53,6 +116,7 @@ class AVLTree:
                 return contains_rec(node.right)
             else:
                 return True
+
         return contains_rec(self.root)
 
     def __len__(self):
@@ -64,39 +128,43 @@ class AVLTree:
                 yield from iter_rec(node.left)
                 yield node.val
                 yield from iter_rec(node.right)
+
         yield from iter_rec(self.root)
 
     def pprint(self, width=64):
         """Attempts to pretty-print this tree's contents."""
         height = self.height()
-        nodes  = [(self.root, 0)]
+        nodes = [(self.root, 0)]
         prev_level = 0
         repr_str = ''
         while nodes:
-            n,level = nodes.pop(0)
+            n, level = nodes.pop(0)
             if prev_level != level:
                 prev_level = level
                 repr_str += '\n'
             if not n:
-                if level < height-1:
-                    nodes.extend([(None, level+1), (None, level+1)])
-                repr_str += '{val:^{width}}'.format(val='-', width=width//2**level)
+                if level < height - 1:
+                    nodes.extend([(None, level + 1), (None, level + 1)])
+                repr_str += '{val:^{width}}'.format(val='-', width=width // 2 ** level)
             elif n:
-                if n.left or level < height-1:
-                    nodes.append((n.left, level+1))
-                if n.right or level < height-1:
-                    nodes.append((n.right, level+1))
-                repr_str += '{val:^{width}}'.format(val=n.val, width=width//2**level)
+                if n.left or level < height - 1:
+                    nodes.append((n.left, level + 1))
+                if n.right or level < height - 1:
+                    nodes.append((n.right, level + 1))
+                repr_str += '{val:^{width}}'.format(val=n.val, width=width // 2 ** level)
         print(repr_str)
 
     def height(self):
         """Returns the height of the longest branch of the tree."""
+
         def height_rec(t):
             if not t:
                 return 0
             else:
-                return max(1+height_rec(t.left), 1+height_rec(t.right))
+                return max(1 + height_rec(t.left), 1 + height_rec(t.right))
+
         return height_rec(self.root)
+
 
 ################################################################################
 # TEST CASES
@@ -105,13 +173,15 @@ def height(t):
     if not t:
         return 0
     else:
-        return max(1+height(t.left), 1+height(t.right))
+        return max(1 + height(t.left), 1 + height(t.right))
+
 
 def traverse(t, fn):
     if t:
         fn(t)
         traverse(t.left, fn)
         traverse(t.right, fn)
+
 
 # LL-fix (simple) test
 # 10 points
@@ -125,6 +195,7 @@ def test_ll_fix_simple():
     tc.assertEqual(height(t.root), 2)
     tc.assertEqual([t.root.left.val, t.root.val, t.root.right.val], [1, 2, 3])
 
+
 # RR-fix (simple) test
 # 10 points
 def test_rr_fix_simple():
@@ -136,6 +207,7 @@ def test_rr_fix_simple():
 
     tc.assertEqual(height(t.root), 2)
     tc.assertEqual([t.root.left.val, t.root.val, t.root.right.val], [1, 2, 3])
+
 
 # LR-fix (simple) test
 # 10 points
@@ -149,6 +221,7 @@ def test_lr_fix_simple():
     tc.assertEqual(height(t.root), 2)
     tc.assertEqual([t.root.left.val, t.root.val, t.root.right.val], [1, 2, 3])
 
+
 # RL-fix (simple) test
 # 10 points
 def test_rl_fix_simple():
@@ -160,6 +233,7 @@ def test_rl_fix_simple():
 
     tc.assertEqual(height(t.root), 2)
     tc.assertEqual([t.root.left.val, t.root.val, t.root.right.val], [1, 2, 3])
+
 
 # ensure key order is maintained after insertions and removals
 # 30 points
@@ -178,8 +252,9 @@ def test_key_order_after_ops():
 
     vals.sort()
 
-    for i,val in enumerate(t):
+    for i, val in enumerate(t):
         tc.assertEqual(val, vals[i])
+
 
 # stress testing
 # 30 points
@@ -194,19 +269,18 @@ def test_stress_testing():
     random.shuffle(vals)
     for i in range(len(vals)):
         t.add(vals[i])
-        for x in vals[:i+1]:
+        for x in vals[:i + 1]:
             tc.assertIn(x, t, 'Element added not in tree')
         traverse(t.root, check_balance)
 
     random.shuffle(vals)
     for i in range(len(vals)):
         del t[vals[i]]
-        for x in vals[i+1:]:
+        for x in vals[i + 1:]:
             tc.assertIn(x, t, 'Incorrect element removed from tree')
-        for x in vals[:i+1]:
+        for x in vals[:i + 1]:
             tc.assertNotIn(x, t, 'Element removed still in tree')
         traverse(t.root, check_balance)
-
 
 
 ################################################################################
@@ -215,8 +289,10 @@ def test_stress_testing():
 def say_test(f):
     print(80 * "#" + "\n" + f.__name__ + "\n" + 80 * "#" + "\n")
 
+
 def say_success():
     print("----> SUCCESS")
+
 
 ################################################################################
 # MAIN
@@ -232,6 +308,7 @@ def main():
         t()
         say_success()
     print(80 * "#" + "\nALL TEST CASES FINISHED SUCCESSFULLY!\n" + 80 * "#")
+
 
 if __name__ == '__main__':
     main()
