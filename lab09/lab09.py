@@ -407,6 +407,7 @@ def test_corner_cases():
 
     for i in range(0, 5):
         t.delete(0)
+        print(t)
 
     tc.assertEqual(t.num_versions(), len(range(0, 5)) + 2)
 
