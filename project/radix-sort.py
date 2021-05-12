@@ -36,9 +36,9 @@ def radix_a_book(book_url='https://www.gutenberg.org/files/84/84-0.txt'):
     for i in range(len(words_lst)):
         words_lst[i] = words_lst[i].ljust(max_len)
 
-    """ Perform count sort """
-    for char_idx in reversed(range(max_len)):  # iterate through each character in words
-        words_lst = count_sort(words_lst, char_idx)
+    """ Iterate through each character and perform count sort """
+    for char_idx in reversed(range(max_len)):  # iterate through each character
+        words_lst = count_sort(words_lst, char_idx) # perform count sort
 
     """ Remove padding """
     words_lst = [i.replace(b' ', b'') for i in words_lst]
